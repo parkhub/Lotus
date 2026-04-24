@@ -28,7 +28,8 @@ colors:
   teal-100: "#E6F4EA"        # Success surface — TBC
 
   # Semantics — reference primitives; never hardcode hex in component code
-  action-primary: "{colors.green-500}"
+  primary: "{colors.green-500}"
+  action-primary: "{colors.primary}"
   action-primary-hover: "{colors.green-400}"
 
   text-primary: "{colors.grey-800}"

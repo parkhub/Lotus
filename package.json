@@ -4,10 +4,10 @@
   "description": "JustPark design system — token source of truth",
   "private": true,
   "scripts": {
-    "build": "node scripts/build-tokens.js",
-    "build:watch": "node --watch scripts/build-tokens.js"
+    "build": "design.md export --format dtcg DESIGN.md > design-tokens/tokens.json",
+    "lint": "design.md lint DESIGN.md"
   },
   "devDependencies": {
-    "js-yaml": "^4.1.0"
+    "@google/design.md": "^0.1.1"
   }
 }
