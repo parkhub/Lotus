@@ -1,3 +1,6 @@
+> [!warning] TO MIGRATE
+> This file belongs in `parkhub/android` as `DESIGN.md` at the repo root — not in the Lotus repo. Copy it there and delete this file once merged.
+
 # Lotus — Android Platform Guidance
 
 Platform-specific implementation guidance for Android. Read alongside the root `DESIGN.md` (token values and brand intent).

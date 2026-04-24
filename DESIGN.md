@@ -53,6 +53,36 @@ colors:
   alert-promo-fg: "{colors.yellow-500}"
   alert-promo-bg: "{colors.yellow-100}"
 
+  # Brand semantics — distinct from action tokens (action = CTA affordance; brand = identity/surface)
+  # TBC: confirm whether brand-primary and action-primary resolve to the same primitive in Figma.
+  brand-primary: "{colors.green-500}"
+  brand-secondary: "{colors.yellow-500}"
+  surface-brand: "{colors.yellow-500}"       # Hero/banner background for brand-coloured surfaces
+
+  # Partner theming — the ONLY tokens Storyblok may override per partner.
+  # Core semantic tokens above are never touched by partner themes.
+  # Components opt in to theming by referencing partner-* tokens explicitly.
+  # Locked by default: all components referencing core tokens are unaffected by partner overrides.
+  #
+  # Storyblok field mapping:
+  #   brandPrimary          → partner-brand-primary
+  #   Image Overlay Start   → partner-brand-secondary
+  #   Image Overlay End     → partner-brand-primary
+  #   Surface Brand         → partner-surface
+  #   On Brand Primary      → partner-on-brand
+  #   Text Primary          → partner-text-primary
+  #   Text Secondary        → partner-text-secondary
+  #   Text Inverse Primary  → partner-text-inverse-primary
+  #   Text Inverse Secondary→ partner-text-inverse-secondary
+  partner-brand-primary: "{colors.brand-primary}"
+  partner-brand-secondary: "{colors.brand-secondary}"
+  partner-surface: "{colors.surface-brand}"
+  partner-on-brand: "{colors.text-on-action}"
+  partner-text-primary: "{colors.text-primary}"
+  partner-text-secondary: "{colors.text-secondary}"
+  partner-text-inverse-primary: "{colors.text-inverse}"
+  partner-text-inverse-secondary: "{colors.text-inverse}"
+
 spacing:
   # Canonical scale — iOS xxxl corrected from 70 to 80 in Phase 0.
   # iOS-only steps (semiSmall=10, xMedium=20) are not in the shared scale.
@@ -142,7 +172,7 @@ Lotus is JustPark's cross-platform design language — a single visual system fo
 
 The palette is built around one confident green (the JustPark mark) set against a quiet neutral scale. Poppins handles display and headings; Nunito Sans handles all body and UI text. Spacing and radius are shared across all three platforms — the same value produces the same visual result everywhere.
 
-This file is the canonical source of truth. `tokens.json` is generated from the YAML front matter above; do not edit it directly. Platform-specific implementation guidance lives in `platforms/ios/DESIGN.md`, `platforms/android/DESIGN.md`, and `platforms/web/DESIGN.md`.
+This file is the canonical source of truth. `tokens.json` is generated from the YAML front matter above; do not edit it directly. Platform-specific implementation guidance lives in each platform's own repo root (`parkhub/ios/DESIGN.md`, `parkhub/android/DESIGN.md`, `parkhub/frontend/DESIGN.md`) — not in this repo. The `platforms/` directory in this repo is a temporary migration staging area and will be removed once those files are placed in their destination repos.
 
 ## Colors
 
@@ -172,3 +202,4 @@ Full-radius (pills, badges, tags) uses 999px rather than 50% to avoid oval disto
 - Token files are read-only. Only `lotus-dsm` may modify `DESIGN.md` or `tokens.json`.
 - For platform-specific component guidance, read the relevant `platforms/*/DESIGN.md` file alongside this one.
 - Values marked TBC in the front matter have not been confirmed from Figma. Do not ship components that depend on them without first resolving the TBC.
+- Partner theming: components that should respond to partner themes must reference `partner-*` tokens. Components referencing core tokens are locked by default and must never be switched to `partner-*` tokens without an explicit design decision. When building a new component, default to core tokens — only use `partner-*` if the component is explicitly in the partner-themeable list (buttons, listing cards, tags, Storyblok sections).

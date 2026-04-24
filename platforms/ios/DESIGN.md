@@ -1,3 +1,6 @@
+> [!warning] TO MIGRATE
+> This file belongs in `parkhub/ios` as `DESIGN.md` at the repo root — not in the Lotus repo. Copy it there and delete this file once merged.
+
 # Lotus — iOS Platform Guidance
 
 Platform-specific implementation guidance for iOS. Read alongside the root `DESIGN.md` (token values and brand intent).
