@@ -1,0 +1,13 @@
+{
+  "name": "@justpark/lotus",
+  "version": "0.1.0",
+  "description": "JustPark design system — token source of truth",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build-tokens.js",
+    "build:watch": "node --watch scripts/build-tokens.js"
+  },
+  "devDependencies": {
+    "js-yaml": "^4.1.0"
+  }
+}
