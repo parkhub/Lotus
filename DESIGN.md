@@ -6,26 +6,26 @@ description: JustPark's design system — web, iOS, Android. Single source of to
 colors:
   # Primitives — canonical values. iOS P3 drift and legacy green corrected in Phase 0.
   green-500: "#23A437"
-  green-400: "#4DBF62"       # TBC — confirm from Figma
-  green-300: "#80D491"       # TBC — confirm from Figma
+  green-400: "#C0E7C7"
+  green-300: "#DAF1DE"
 
-  grey-900: "#1A2028"        # TBC — confirm from Figma
+  grey-900: "#000000"
   grey-800: "#384250"        # Text/Primary (web + Figma canonical)
-  grey-700: "#5A6572"        # TBC — confirm from Figma
-  grey-600: "#8C96A0"        # TBC — confirm from Figma
+  grey-700: "#5A6572"        # TBC — no Figma match found (Grey scale gap)
+  grey-600: "#6E7782"
   grey-300: "#DFE1E4"        # Border/Default (web canonical)
   grey-200: "#F0F1F4"        # Surface/Grey (web canonical)
   grey-100: "#F6F6F8"        # Surface/LightGrey (web canonical)
   grey-000: "#FFFFFF"
 
-  red-500: "#D93025"         # Error — TBC confirm from Figma
-  red-100: "#FDECEA"         # Error surface — TBC
-  yellow-500: "#F5A623"      # Warning/Promo — TBC confirm from Figma
-  yellow-100: "#FFF8EC"      # Warning surface — TBC
-  blue-500: "#1A73E8"        # Info — TBC confirm from Figma
-  blue-100: "#E8F0FE"        # Info surface — TBC
-  teal-500: "#1E8E3E"        # Success — TBC (may alias green-500)
-  teal-100: "#E6F4EA"        # Success surface — TBC
+  red-500: "#FB3C59"         # Error
+  red-100: "#FEF2F6"         # Error surface
+  yellow-500: "#FABA0C"      # Warning/Promo
+  yellow-100: "#FEF9EC"      # Warning surface
+  blue-500: "#41A4EC"        # Info
+  blue-100: "#EBF5FE"        # Info surface
+  teal-500: "#23A437"        # Success — aliases green-500 as confirmed from Figma
+  teal-100: "#F0F9F2"        # Success surface
 
   # Semantics — reference primitives; never hardcode hex in component code
   primary: "{colors.green-500}"
