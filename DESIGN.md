@@ -194,6 +194,10 @@ Type scale values are set from Figma as the design authority. iOS and Android ad
 
 An 8-point grid underpins all three platforms. The scale is intentionally simple — gaps between values are large enough to be meaningfully different in layouts.
 
+## Elevation & Depth
+
+Lotus uses a flat visual hierarchy — no shadows or blurs. Depth is conveyed through colour contrast and surface layering: `surface-default` (white) sits on `surface-subtle` or `surface-muted` backgrounds; borders (`border-default`, `border-strong`) define container edges. This keeps the interface crisp across web, iOS, and Android without platform-specific shadow implementations.
+
 ## Shapes
 
 Full-radius (pills, badges, tags) uses 999px rather than 50% to avoid oval distortion on non-square containers.
