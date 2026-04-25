@@ -1,4 +1,4 @@
-name: Lint DESIGN.md
+name: Lint and build DESIGN.md
 
 on:
   pull_request:
@@ -6,8 +6,8 @@ on:
     branches: [main]
 
 jobs:
-  lint:
-    name: Validate design files
+  lint-and-build:
+    name: Validate and export design tokens
     runs-on: ubuntu-latest
 
     steps:
@@ -17,17 +17,20 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Lint root DESIGN.md
-        run: npx --yes @google/design.md lint DESIGN.md
+      - name: Install dependencies
+        run: npm ci
 
-      # Platform files are guidance prose with no YAML front matter.
-      # The CLI may warn on content-only files — treat as informational until
-      # the alpha spec clarifies how to handle them.
-      - name: Lint iOS platform guidance
-        run: npx @google/design.md lint platforms/ios/DESIGN.md || true
+      - name: Lint DESIGN.md
+        run: npm run lint
 
-      - name: Lint Android platform guidance
-        run: npx @google/design.md lint platforms/android/DESIGN.md || true
+      - name: Export tokens.json
+        run: npm run build
 
-      - name: Lint web platform guidance
-        run: npx @google/design.md lint platforms/web/DESIGN.md || true
+      - name: Commit updated tokens.json
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add design-tokens/tokens.json
+          git diff --cached --quiet || git commit -m "chore: regenerate tokens.json from DESIGN.md [skip ci]"
+          git push
