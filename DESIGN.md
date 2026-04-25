@@ -4,58 +4,61 @@ name: Lotus
 description: JustPark's design system — web, iOS, Android. Single source of token truth.
 
 colors:
-  # Primitives — canonical values. iOS P3 drift and legacy green corrected in Phase 0.
+  # Primitives — all values confirmed from Figma AI Version file (2026-04-25).
+  # Names mirror Figma variable names exactly (slash → hyphen, lowercase).
   green-500: "#23A437"
   green-400: "#C0E7C7"
   green-300: "#DAF1DE"
+  green-50:  "#F0F9F2"
 
   grey-900: "#000000"
-  grey-800: "#384250"        # Text/Primary (web + Figma canonical)
-  grey-700: "#5A6572"        # TBC — no Figma match found (Grey scale gap)
-  grey-600: "#6E7782"
-  grey-300: "#DFE1E4"        # Border/Default (web canonical)
-  grey-200: "#F0F1F4"        # Surface/Grey (web canonical)
-  grey-100: "#F6F6F8"        # Surface/LightGrey (web canonical)
-  grey-000: "#FFFFFF"
+  grey-850: "#212830"
+  grey-800: "#2E3642"
+  grey-700: "#384250"
+  grey-500: "#6E7782"
+  grey-400: "#A8ADB3"
+  grey-300: "#DFE1E4"
+  grey-100: "#F0F1F4"
+  grey-50:  "#F6F6F8"
+  grey-0:   "#FFFFFF"
 
-  red-500: "#FB3C59"         # Error
-  red-100: "#FEF2F6"         # Error surface
-  yellow-500: "#FABA0C"      # Warning/Promo
-  yellow-100: "#FEF9EC"      # Warning surface
-  blue-500: "#41A4EC"        # Info
-  blue-100: "#EBF5FE"        # Info surface
-  teal-500: "#23A437"        # Success — aliases green-500 as confirmed from Figma
-  teal-100: "#F0F9F2"        # Success surface
+  red-500: "#FB3C59"
+  red-50:  "#FEF2F6"
+
+  yellow-500: "#FABA0C"
+  yellow-50:  "#FEF9EC"
+
+  blue-500: "#41A4EC"
+  blue-50:  "#EBF5FE"
 
   # Semantics — reference primitives; never hardcode hex in component code
   primary: "{colors.green-500}"
   action-primary: "{colors.primary}"
   action-primary-hover: "{colors.green-400}"
 
-  text-primary: "{colors.grey-800}"
-  text-secondary: "{colors.grey-700}"
-  text-disabled: "{colors.grey-600}"
-  text-inverse: "{colors.grey-000}"
-  text-on-action: "{colors.grey-000}"
+  text-primary: "{colors.grey-700}"
+  text-secondary: "{colors.grey-500}"
+  text-disabled: "{colors.grey-400}"
+  text-inverse: "{colors.grey-0}"
+  text-on-action: "{colors.grey-0}"
 
-  surface-default: "{colors.grey-000}"
-  surface-subtle: "{colors.grey-100}"
-  surface-muted: "{colors.grey-200}"
+  surface-default: "{colors.grey-0}"
+  surface-subtle: "{colors.grey-50}"
+  surface-muted: "{colors.grey-100}"
 
   border-default: "{colors.grey-300}"
-  border-strong: "{colors.grey-600}"
+  border-strong: "{colors.grey-500}"
 
   alert-error-fg: "{colors.red-500}"
-  alert-error-bg: "{colors.red-100}"
-  alert-success-fg: "{colors.teal-500}"
-  alert-success-bg: "{colors.teal-100}"
+  alert-error-bg: "{colors.red-50}"
+  alert-success-fg: "{colors.green-500}"
+  alert-success-bg: "{colors.green-50}"
   alert-info-fg: "{colors.blue-500}"
-  alert-info-bg: "{colors.blue-100}"
+  alert-info-bg: "{colors.blue-50}"
   alert-promo-fg: "{colors.yellow-500}"
-  alert-promo-bg: "{colors.yellow-100}"
+  alert-promo-bg: "{colors.yellow-50}"
 
   # Brand semantics — distinct from action tokens (action = CTA affordance; brand = identity/surface)
-  # TBC: confirm whether brand-primary and action-primary resolve to the same primitive in Figma.
   brand-primary: "{colors.green-500}"
   brand-secondary: "{colors.yellow-500}"
   surface-brand: "{colors.yellow-500}"       # Hero/banner background for brand-coloured surfaces
