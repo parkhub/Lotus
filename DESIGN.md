@@ -190,11 +190,11 @@ Two typefaces, two roles. Poppins is used only for headings — its geometric we
 
 Type scale values are set from Figma as the design authority. iOS and Android adapt point sizes to their platform conventions via the adapter layer; the semantic names and visual intent are shared.
 
-## Spacing
+## Layout
 
 An 8-point grid underpins all three platforms. The scale is intentionally simple — gaps between values are large enough to be meaningfully different in layouts.
 
-## Radius
+## Shapes
 
 Full-radius (pills, badges, tags) uses 999px rather than 50% to avoid oval distortion on non-square containers.
 
