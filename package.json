@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "build": "design.md export --format dtcg DESIGN.md > design-tokens/tokens.json",
+    "build:platforms": "node scripts/build-platforms.mjs",
     "lint": "design.md lint DESIGN.md"
   },
   "devDependencies": {

@@ -27,11 +27,14 @@ jobs:
       - name: Export tokens.json
         run: npm run build
 
-      - name: Commit updated tokens.json
+      - name: Build platform outputs
+        run: npm run build:platforms
+
+      - name: Commit generated files
         if: github.ref == 'refs/heads/main'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add design-tokens/tokens.json
-          git diff --cached --quiet || git commit -m "chore: regenerate tokens.json from DESIGN.md [skip ci]"
+          git add design-tokens/tokens.json dist/
+          git diff --cached --quiet || git commit -m "chore: regenerate tokens.json and platform outputs [skip ci]"
           git push

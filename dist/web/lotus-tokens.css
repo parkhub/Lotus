@@ -1,0 +1,112 @@
+/* Lotus Design Tokens — generated, do not edit */
+/* Source: design-tokens/tokens.json */
+
+:root {
+  /* Colors */
+  --lotus-color-green-500: #23a437;
+  --lotus-color-green-400: #c0e7c7;
+  --lotus-color-green-300: #daf1de;
+  --lotus-color-green-50: #f0f9f2;
+  --lotus-color-grey-900: #000000;
+  --lotus-color-grey-850: #212830;
+  --lotus-color-grey-800: #2e3642;
+  --lotus-color-grey-700: #384250;
+  --lotus-color-grey-500: #6e7782;
+  --lotus-color-grey-400: #a8adb3;
+  --lotus-color-grey-300: #dfe1e4;
+  --lotus-color-grey-100: #f0f1f4;
+  --lotus-color-grey-50: #f6f6f8;
+  --lotus-color-grey-0: #ffffff;
+  --lotus-color-red-500: #fb3c59;
+  --lotus-color-red-50: #fef2f6;
+  --lotus-color-yellow-500: #faba0c;
+  --lotus-color-yellow-50: #fef9ec;
+  --lotus-color-blue-500: #41a4ec;
+  --lotus-color-blue-50: #ebf5fe;
+  --lotus-color-primary: #23a437;
+  --lotus-color-action-primary: #23a437;
+  --lotus-color-action-primary-hover: #c0e7c7;
+  --lotus-color-text-primary: #384250;
+  --lotus-color-text-secondary: #6e7782;
+  --lotus-color-text-disabled: #a8adb3;
+  --lotus-color-text-inverse: #ffffff;
+  --lotus-color-text-on-action: #ffffff;
+  --lotus-color-surface-default: #ffffff;
+  --lotus-color-surface-subtle: #f6f6f8;
+  --lotus-color-surface-muted: #f0f1f4;
+  --lotus-color-border-default: #dfe1e4;
+  --lotus-color-border-strong: #6e7782;
+  --lotus-color-alert-error-fg: #fb3c59;
+  --lotus-color-alert-error-bg: #fef2f6;
+  --lotus-color-alert-success-fg: #23a437;
+  --lotus-color-alert-success-bg: #f0f9f2;
+  --lotus-color-alert-info-fg: #41a4ec;
+  --lotus-color-alert-info-bg: #ebf5fe;
+  --lotus-color-alert-promo-fg: #faba0c;
+  --lotus-color-alert-promo-bg: #fef9ec;
+  --lotus-color-brand-primary: #23a437;
+  --lotus-color-brand-secondary: #faba0c;
+  --lotus-color-surface-brand: #faba0c;
+  --lotus-color-partner-brand-primary: #23a437;
+  --lotus-color-partner-brand-secondary: #faba0c;
+  --lotus-color-partner-surface: #faba0c;
+  --lotus-color-partner-on-brand: #ffffff;
+  --lotus-color-partner-text-primary: #384250;
+  --lotus-color-partner-text-secondary: #6e7782;
+  --lotus-color-partner-text-inverse-primary: #ffffff;
+  --lotus-color-partner-text-inverse-secondary: #ffffff;
+
+  /* Spacing */
+  --lotus-spacing-xs: 4px;
+  --lotus-spacing-s: 8px;
+  --lotus-spacing-m: 12px;
+  --lotus-spacing-l: 16px;
+  --lotus-spacing-xl: 24px;
+  --lotus-spacing-xxl: 32px;
+  --lotus-spacing-xxxl: 48px;
+  --lotus-spacing-xxxxl: 80px;
+
+  /* Border Radius */
+  --lotus-rounded-none: 0px;
+  --lotus-rounded-xs: 2px;
+  --lotus-rounded-sm: 4px;
+  --lotus-rounded-md: 8px;
+  --lotus-rounded-lg: 12px;
+  --lotus-rounded-xl: 16px;
+  --lotus-rounded-full: 999px;
+
+  /* Typography */
+  --lotus-typography-h1-font-family: 'Poppins';
+  --lotus-typography-h1-font-size: 32px;
+  --lotus-typography-h1-font-weight: 600;
+  --lotus-typography-h2-font-family: 'Poppins';
+  --lotus-typography-h2-font-size: 24px;
+  --lotus-typography-h2-font-weight: 300;
+  --lotus-typography-h3-font-family: 'Poppins';
+  --lotus-typography-h3-font-size: 20px;
+  --lotus-typography-h3-font-weight: 600;
+  --lotus-typography-body-large-font-family: 'Nunito Sans';
+  --lotus-typography-body-large-font-size: 16px;
+  --lotus-typography-body-large-font-weight: 400;
+  --lotus-typography-body-large-bold-font-family: 'Nunito Sans';
+  --lotus-typography-body-large-bold-font-size: 16px;
+  --lotus-typography-body-large-bold-font-weight: 700;
+  --lotus-typography-body-medium-font-family: 'Nunito Sans';
+  --lotus-typography-body-medium-font-size: 14px;
+  --lotus-typography-body-medium-font-weight: 400;
+  --lotus-typography-body-medium-bold-font-family: 'Nunito Sans';
+  --lotus-typography-body-medium-bold-font-size: 14px;
+  --lotus-typography-body-medium-bold-font-weight: 700;
+  --lotus-typography-body-small-font-family: 'Nunito Sans';
+  --lotus-typography-body-small-font-size: 12px;
+  --lotus-typography-body-small-font-weight: 400;
+  --lotus-typography-body-small-bold-font-family: 'Nunito Sans';
+  --lotus-typography-body-small-bold-font-size: 12px;
+  --lotus-typography-body-small-bold-font-weight: 700;
+  --lotus-typography-caption-font-family: 'Nunito Sans';
+  --lotus-typography-caption-font-size: 11px;
+  --lotus-typography-caption-font-weight: 400;
+  --lotus-typography-micro-font-family: 'Nunito Sans';
+  --lotus-typography-micro-font-size: 10px;
+  --lotus-typography-micro-font-weight: 400;
+}

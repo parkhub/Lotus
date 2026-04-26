@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Lotus Design Tokens — generated, do not edit -->
+<!-- Source: design-tokens/tokens.json -->
+<resources>
+
+    <!-- Colors -->
+    <color name="lotus_color_green_500">#23a437</color>
+    <color name="lotus_color_green_400">#c0e7c7</color>
+    <color name="lotus_color_green_300">#daf1de</color>
+    <color name="lotus_color_green_50">#f0f9f2</color>
+    <color name="lotus_color_grey_900">#000000</color>
+    <color name="lotus_color_grey_850">#212830</color>
+    <color name="lotus_color_grey_800">#2e3642</color>
+    <color name="lotus_color_grey_700">#384250</color>
+    <color name="lotus_color_grey_500">#6e7782</color>
+    <color name="lotus_color_grey_400">#a8adb3</color>
+    <color name="lotus_color_grey_300">#dfe1e4</color>
+    <color name="lotus_color_grey_100">#f0f1f4</color>
+    <color name="lotus_color_grey_50">#f6f6f8</color>
+    <color name="lotus_color_grey_0">#ffffff</color>
+    <color name="lotus_color_red_500">#fb3c59</color>
+    <color name="lotus_color_red_50">#fef2f6</color>
+    <color name="lotus_color_yellow_500">#faba0c</color>
+    <color name="lotus_color_yellow_50">#fef9ec</color>
+    <color name="lotus_color_blue_500">#41a4ec</color>
+    <color name="lotus_color_blue_50">#ebf5fe</color>
+    <color name="lotus_color_primary">#23a437</color>
+    <color name="lotus_color_action_primary">#23a437</color>
+    <color name="lotus_color_action_primary_hover">#c0e7c7</color>
+    <color name="lotus_color_text_primary">#384250</color>
+    <color name="lotus_color_text_secondary">#6e7782</color>
+    <color name="lotus_color_text_disabled">#a8adb3</color>
+    <color name="lotus_color_text_inverse">#ffffff</color>
+    <color name="lotus_color_text_on_action">#ffffff</color>
+    <color name="lotus_color_surface_default">#ffffff</color>
+    <color name="lotus_color_surface_subtle">#f6f6f8</color>
+    <color name="lotus_color_surface_muted">#f0f1f4</color>
+    <color name="lotus_color_border_default">#dfe1e4</color>
+    <color name="lotus_color_border_strong">#6e7782</color>
+    <color name="lotus_color_alert_error_fg">#fb3c59</color>
+    <color name="lotus_color_alert_error_bg">#fef2f6</color>
+    <color name="lotus_color_alert_success_fg">#23a437</color>
+    <color name="lotus_color_alert_success_bg">#f0f9f2</color>
+    <color name="lotus_color_alert_info_fg">#41a4ec</color>
+    <color name="lotus_color_alert_info_bg">#ebf5fe</color>
+    <color name="lotus_color_alert_promo_fg">#faba0c</color>
+    <color name="lotus_color_alert_promo_bg">#fef9ec</color>
+    <color name="lotus_color_brand_primary">#23a437</color>
+    <color name="lotus_color_brand_secondary">#faba0c</color>
+    <color name="lotus_color_surface_brand">#faba0c</color>
+    <color name="lotus_color_partner_brand_primary">#23a437</color>
+    <color name="lotus_color_partner_brand_secondary">#faba0c</color>
+    <color name="lotus_color_partner_surface">#faba0c</color>
+    <color name="lotus_color_partner_on_brand">#ffffff</color>
+    <color name="lotus_color_partner_text_primary">#384250</color>
+    <color name="lotus_color_partner_text_secondary">#6e7782</color>
+    <color name="lotus_color_partner_text_inverse_primary">#ffffff</color>
+    <color name="lotus_color_partner_text_inverse_secondary">#ffffff</color>
+
+    <!-- Spacing -->
+    <dimen name="lotus_spacing_xs">4px</dimen>
+    <dimen name="lotus_spacing_s">8px</dimen>
+    <dimen name="lotus_spacing_m">12px</dimen>
+    <dimen name="lotus_spacing_l">16px</dimen>
+    <dimen name="lotus_spacing_xl">24px</dimen>
+    <dimen name="lotus_spacing_xxl">32px</dimen>
+    <dimen name="lotus_spacing_xxxl">48px</dimen>
+    <dimen name="lotus_spacing_xxxxl">80px</dimen>
+
+    <!-- Border Radius -->
+    <dimen name="lotus_rounded_none">0px</dimen>
+    <dimen name="lotus_rounded_xs">2px</dimen>
+    <dimen name="lotus_rounded_sm">4px</dimen>
+    <dimen name="lotus_rounded_md">8px</dimen>
+    <dimen name="lotus_rounded_lg">12px</dimen>
+    <dimen name="lotus_rounded_xl">16px</dimen>
+    <dimen name="lotus_rounded_full">999px</dimen>
+
+    <!-- Typography: font families -->
+    <string name="lotus_typography_h1_font_family">Poppins</string>
+    <dimen name="lotus_typography_h1_font_size">32sp</dimen>
+    <integer name="lotus_typography_h1_font_weight">600</integer>
+    <string name="lotus_typography_h2_font_family">Poppins</string>
+    <dimen name="lotus_typography_h2_font_size">24sp</dimen>
+    <integer name="lotus_typography_h2_font_weight">300</integer>
+    <string name="lotus_typography_h3_font_family">Poppins</string>
+    <dimen name="lotus_typography_h3_font_size">20sp</dimen>
+    <integer name="lotus_typography_h3_font_weight">600</integer>
+    <string name="lotus_typography_body_large_font_family">Nunito Sans</string>
+    <dimen name="lotus_typography_body_large_font_size">16sp</dimen>
+    <integer name="lotus_typography_body_large_font_weight">400</integer>
+    <string name="lotus_typography_body_large_bold_font_family">Nunito Sans</string>
+    <dimen name="lotus_typography_body_large_bold_font_size">16sp</dimen>
+    <integer name="lotus_typography_body_large_bold_font_weight">700</integer>
+    <string name="lotus_typography_body_medium_font_family">Nunito Sans</string>
+    <dimen name="lotus_typography_body_medium_font_size">14sp</dimen>
+    <integer name="lotus_typography_body_medium_font_weight">400</integer>
+    <string name="lotus_typography_body_medium_bold_font_family">Nunito Sans</string>
+    <dimen name="lotus_typography_body_medium_bold_font_size">14sp</dimen>
+    <integer name="lotus_typography_body_medium_bold_font_weight">700</integer>
+    <string name="lotus_typography_body_small_font_family">Nunito Sans</string>
+    <dimen name="lotus_typography_body_small_font_size">12sp</dimen>
+    <integer name="lotus_typography_body_small_font_weight">400</integer>
+    <string name="lotus_typography_body_small_bold_font_family">Nunito Sans</string>
+    <dimen name="lotus_typography_body_small_bold_font_size">12sp</dimen>
+    <integer name="lotus_typography_body_small_bold_font_weight">700</integer>
+    <string name="lotus_typography_caption_font_family">Nunito Sans</string>
+    <dimen name="lotus_typography_caption_font_size">11sp</dimen>
+    <integer name="lotus_typography_caption_font_weight">400</integer>
+    <string name="lotus_typography_micro_font_family">Nunito Sans</string>
+    <dimen name="lotus_typography_micro_font_size">10sp</dimen>
+    <integer name="lotus_typography_micro_font_weight">400</integer>
+
+</resources>
