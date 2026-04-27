@@ -4,26 +4,28 @@ name: Lotus
 description: JustPark's design system — web, iOS, Android. Single source of token truth.
 
 colors:
-  # Primitives — all values confirmed from Figma AI Version file (2026-04-25).
+  # Primitives — all values confirmed from Figma AI Version file (2026-04-27, Phase 1 palette update).
   # Names mirror Figma variable names exactly (slash → hyphen, lowercase).
+  # Phase 1 changes: greys → pure monochromatic, red → true red (#D92D20), action-primary → black.
   green-500: "#23A437"
   green-400: "#C0E7C7"
   green-300: "#DAF1DE"
   green-50:  "#F0F9F2"
+  green-900: "#004D25"
 
-  grey-900: "#000000"
-  grey-850: "#212830"
-  grey-800: "#2E3642"
-  grey-700: "#384250"
-  grey-500: "#6E7782"
-  grey-400: "#A8ADB3"
-  grey-300: "#DFE1E4"
-  grey-100: "#F0F1F4"
-  grey-50:  "#F6F6F8"
+  grey-900: "#0A0A0A"
+  grey-850: "#1C1C1C"
+  grey-800: "#2E2E2E"
+  grey-700: "#404040"
+  grey-500: "#6B6B6B"
+  grey-400: "#ABABAB"
+  grey-300: "#E0E0E0"
+  grey-100: "#F2F2F2"
+  grey-50:  "#F7F7F7"
   grey-0:   "#FFFFFF"
 
-  red-500: "#FB3C59"
-  red-50:  "#FEF2F6"
+  red-500: "#D92D20"
+  red-50:  "#FEF3F2"
 
   yellow-500: "#FABA0C"
   yellow-50:  "#FEF9EC"
@@ -33,14 +35,14 @@ colors:
 
   # Semantics — reference primitives; never hardcode hex in component code
   primary: "{colors.green-500}"
-  action-primary: "{colors.primary}"
-  action-primary-hover: "{colors.green-400}"
+  action-primary: "{colors.grey-900}"
+  action-primary-hover: "{colors.grey-800}"
 
   text-primary: "{colors.grey-700}"
   text-secondary: "{colors.grey-500}"
   text-disabled: "{colors.grey-400}"
-  text-inverse: "{colors.grey-0}"
-  text-on-action: "{colors.grey-0}"
+  text-contrast: "{colors.grey-0}"
+  brand-on-action: "{colors.grey-0}"
 
   surface-default: "{colors.grey-0}"
   surface-subtle: "{colors.grey-50}"
@@ -60,8 +62,8 @@ colors:
 
   # Brand semantics — distinct from action tokens (action = CTA affordance; brand = identity/surface)
   brand-primary: "{colors.green-500}"
-  brand-secondary: "{colors.yellow-500}"
-  surface-brand: "{colors.yellow-500}"       # Hero/banner background for brand-coloured surfaces
+  brand-secondary: "{colors.green-900}"
+  surface-brand: "{colors.green-900}"        # Hero/banner background for brand-coloured surfaces
 
   # Partner theming — the ONLY tokens Storyblok may override per partner.
   # Core semantic tokens above are never touched by partner themes.
@@ -81,11 +83,11 @@ colors:
   partner-brand-primary: "{colors.brand-primary}"
   partner-brand-secondary: "{colors.brand-secondary}"
   partner-surface: "{colors.surface-brand}"
-  partner-on-brand: "{colors.text-on-action}"
+  partner-on-brand: "{colors.brand-on-action}"
   partner-text-primary: "{colors.text-primary}"
   partner-text-secondary: "{colors.text-secondary}"
-  partner-text-inverse-primary: "{colors.text-inverse}"
-  partner-text-inverse-secondary: "{colors.text-inverse}"
+  partner-text-inverse-primary: "{colors.text-contrast}"
+  partner-text-inverse-secondary: "{colors.text-contrast}"
 
 spacing:
   # Canonical scale — iOS xxxl corrected from 70 to 80 in Phase 0.
@@ -110,63 +112,107 @@ rounded:
   full: 999px
 
 typography:
-  # Canonical weights from Figma. iOS h1 corrected from Bold (700) to SemiBold (600) in Phase 0.
-  # iOS h2 corrected from 23px to 24px in Phase 0.
-  # Web font corrected from "Nunito" to "Nunito Sans" in Phase 0.
+  # Single typeface: Inter. Replaced Poppins + Nunito Sans in Phase 1 — added medium (500) and
+  # semibold (600) weights which the previous stack lacked. All sizes aligned with Figma.
+  hero:
+    fontFamily: Inter
+    fontSize: 40px
+    fontWeight: 600
+    lineHeight: 1.2
   h1:
-    fontFamily: Poppins
+    fontFamily: Inter
     fontSize: 32px
     fontWeight: 600
     lineHeight: 1.2
   h2:
-    fontFamily: Poppins
+    fontFamily: Inter
     fontSize: 24px
-    fontWeight: 300
-    lineHeight: 1.3
+    fontWeight: 600
+    lineHeight: 1.25
   h3:
-    fontFamily: Poppins
+    fontFamily: Inter
     fontSize: 20px
     fontWeight: 600
     lineHeight: 1.3
+  h4:
+    fontFamily: Inter
+    fontSize: 18px
+    fontWeight: 500
+    lineHeight: 1.3
   body-large:
-    fontFamily: Nunito Sans
+    fontFamily: Inter
     fontSize: 16px
     fontWeight: 400
     lineHeight: 1.5
+  body-large-medium:
+    fontFamily: Inter
+    fontSize: 16px
+    fontWeight: 500
+    lineHeight: 1.5
+  body-large-semibold:
+    fontFamily: Inter
+    fontSize: 16px
+    fontWeight: 600
+    lineHeight: 1.5
   body-large-bold:
-    fontFamily: Nunito Sans
+    fontFamily: Inter
     fontSize: 16px
     fontWeight: 700
     lineHeight: 1.5
   body-medium:
-    fontFamily: Nunito Sans
+    fontFamily: Inter
     fontSize: 14px
     fontWeight: 400
     lineHeight: 1.5
+  body-medium-medium:
+    fontFamily: Inter
+    fontSize: 14px
+    fontWeight: 500
+    lineHeight: 1.5
+  body-medium-semibold:
+    fontFamily: Inter
+    fontSize: 14px
+    fontWeight: 600
+    lineHeight: 1.5
   body-medium-bold:
-    fontFamily: Nunito Sans
+    fontFamily: Inter
     fontSize: 14px
     fontWeight: 700
     lineHeight: 1.5
   body-small:
-    fontFamily: Nunito Sans
+    fontFamily: Inter
     fontSize: 12px
     fontWeight: 400
     lineHeight: 1.4
+  body-small-semibold:
+    fontFamily: Inter
+    fontSize: 12px
+    fontWeight: 600
+    lineHeight: 1.4
   body-small-bold:
-    fontFamily: Nunito Sans
+    fontFamily: Inter
     fontSize: 12px
     fontWeight: 700
     lineHeight: 1.4
   caption:
-    fontFamily: Nunito Sans
+    fontFamily: Inter
     fontSize: 11px
     fontWeight: 400
     lineHeight: 1.4
+  caption-bold:
+    fontFamily: Inter
+    fontSize: 11px
+    fontWeight: 600
+    lineHeight: 1.4
   micro:
-    fontFamily: Nunito Sans
+    fontFamily: Inter
     fontSize: 10px
     fontWeight: 400
+    lineHeight: 1.4
+  micro-bold:
+    fontFamily: Inter
+    fontSize: 10px
+    fontWeight: 600
     lineHeight: 1.4
 ---
 
@@ -180,13 +226,15 @@ This file is the canonical source of truth. `tokens.json` is generated from the 
 
 ## Colors
 
-The green rests on JustPark's brand heritage — confident, clear, not aggressive. The neutral scale is warm-grey rather than blue-grey, keeping the interface approachable. The single brand colour carries all primary actions; no competing accent colours.
+The green rests on JustPark's brand heritage — confident, clear, not aggressive. The neutral scale is pure monochromatic grey with no hue bias, giving the interface strong contrast and a modern, platform-neutral feel. Primary actions (buttons, CTAs) use black (`action-primary: grey-900`) — this separates affordance from brand identity and passes WCAG AAA with white text. Brand green is reserved for identity and success states only.
 
 Alert semantics follow conventional patterns (red=error, green=success, blue=info, amber=promo) so they carry meaning without relying on Lotus knowledge.
 
 ## Typography
 
-Two typefaces, two roles. Poppins is used only for headings — its geometric weight gives display text character without being decorative. Nunito Sans handles everything else; it is highly legible at small sizes and works well at the range of densities JustPark's UIs require.
+Single typeface: Inter. The previous Poppins + Nunito Sans stack lacked medium (500) and semibold (600) weights, which are essential for hierarchy within body text. Inter covers the full weight range (Regular → Medium → SemiBold → Bold) in one consistent geometric grotesque, reducing font-loading overhead and eliminating cross-typeface optical size mismatches.
+
+Headings use SemiBold (600) for strength. H4 steps down to Medium (500) as a bridge into body text. Body styles are explicitly named for each weight so component authors never need to hardcode a numeric weight — they reference a token instead.
 
 Type scale values are set from Figma as the design authority. iOS and Android adapt point sizes to their platform conventions via the adapter layer; the semantic names and visual intent are shared.
 
