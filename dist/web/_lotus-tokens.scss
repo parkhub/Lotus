@@ -1,0 +1,122 @@
+// Lotus Design Tokens — generated, do not edit
+// Source: design-tokens/tokens.json
+//
+// Usage (with @use namespace):
+//   @use '@justpark/lotus/dist/web/lotus-tokens' as lotus;
+//   .foo { color: lotus.$text-primary; gap: lotus.$spacing-xs; }
+//
+// Replaces: justpark-ui/src/scss/lotus/_colorPrimitives.scss
+// The semantic layer (_colors.scss) should @use this file instead of _colorPrimitives.
+
+// ─── Primitive colors ────────────────────────────────────────────────────────
+// Raw values only. Do not reference these directly in components —
+// use a semantic token instead.
+$green-500: #23a437;
+$green-400: #c0e7c7;
+$green-300: #daf1de;
+$green-50: #f0f9f2;
+$grey-900: #000000;
+$grey-850: #212830;
+$grey-800: #2e3642;
+$grey-700: #384250;
+$grey-500: #6e7782;
+$grey-400: #a8adb3;
+$grey-300: #dfe1e4;
+$grey-100: #f0f1f4;
+$grey-50: #f6f6f8;
+$grey-0: #ffffff;
+$red-500: #fb3c59;
+$red-50: #fef2f6;
+$yellow-500: #faba0c;
+$yellow-50: #fef9ec;
+$blue-500: #41a4ec;
+$blue-50: #ebf5fe;
+
+// ─── Semantic colors ────────────────────────────────────────────────────────
+// Purpose-named tokens. These are the values components should reference.
+$primary: #23a437;
+$action-primary: #23a437;
+$action-primary-hover: #c0e7c7;
+$text-primary: #384250;
+$text-secondary: #6e7782;
+$text-disabled: #a8adb3;
+$text-inverse: #ffffff;
+$text-on-action: #ffffff;
+$surface-default: #ffffff;
+$surface-subtle: #f6f6f8;
+$surface-muted: #f0f1f4;
+$border-default: #dfe1e4;
+$border-strong: #6e7782;
+$alert-error-fg: #fb3c59;
+$alert-error-bg: #fef2f6;
+$alert-success-fg: #23a437;
+$alert-success-bg: #f0f9f2;
+$alert-info-fg: #41a4ec;
+$alert-info-bg: #ebf5fe;
+$alert-promo-fg: #faba0c;
+$alert-promo-bg: #fef9ec;
+$brand-primary: #23a437;
+$brand-secondary: #faba0c;
+$surface-brand: #faba0c;
+$partner-brand-primary: #23a437;
+$partner-brand-secondary: #faba0c;
+$partner-surface: #faba0c;
+$partner-on-brand: #ffffff;
+$partner-text-primary: #384250;
+$partner-text-secondary: #6e7782;
+$partner-text-inverse-primary: #ffffff;
+$partner-text-inverse-secondary: #ffffff;
+
+// ─── Spacing ────────────────────────────────────────────────────────────────
+$spacing-xs: 4px;
+$spacing-s: 8px;
+$spacing-m: 12px;
+$spacing-l: 16px;
+$spacing-xl: 24px;
+$spacing-xxl: 32px;
+$spacing-xxxl: 48px;
+$spacing-xxxxl: 80px;
+
+// ─── Border radius ──────────────────────────────────────────────────────────
+$rounded-none: 0px;
+$rounded-xs: 2px;
+$rounded-sm: 4px;
+$rounded-md: 8px;
+$rounded-lg: 12px;
+$rounded-xl: 16px;
+$rounded-full: 999px;
+
+// ─── Typography ─────────────────────────────────────────────────────────────
+$typography-h1-font-family: 'Poppins';
+$typography-h1-font-size: 32px;
+$typography-h1-font-weight: 600;
+$typography-h2-font-family: 'Poppins';
+$typography-h2-font-size: 24px;
+$typography-h2-font-weight: 300;
+$typography-h3-font-family: 'Poppins';
+$typography-h3-font-size: 20px;
+$typography-h3-font-weight: 600;
+$typography-body-large-font-family: 'Nunito Sans';
+$typography-body-large-font-size: 16px;
+$typography-body-large-font-weight: 400;
+$typography-body-large-bold-font-family: 'Nunito Sans';
+$typography-body-large-bold-font-size: 16px;
+$typography-body-large-bold-font-weight: 700;
+$typography-body-medium-font-family: 'Nunito Sans';
+$typography-body-medium-font-size: 14px;
+$typography-body-medium-font-weight: 400;
+$typography-body-medium-bold-font-family: 'Nunito Sans';
+$typography-body-medium-bold-font-size: 14px;
+$typography-body-medium-bold-font-weight: 700;
+$typography-body-small-font-family: 'Nunito Sans';
+$typography-body-small-font-size: 12px;
+$typography-body-small-font-weight: 400;
+$typography-body-small-bold-font-family: 'Nunito Sans';
+$typography-body-small-bold-font-size: 12px;
+$typography-body-small-bold-font-weight: 700;
+$typography-caption-font-family: 'Nunito Sans';
+$typography-caption-font-size: 11px;
+$typography-caption-font-weight: 400;
+$typography-micro-font-family: 'Nunito Sans';
+$typography-micro-font-size: 10px;
+$typography-micro-font-weight: 400;

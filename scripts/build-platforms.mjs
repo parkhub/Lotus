@@ -5,6 +5,7 @@
  *
  * Outputs:
  *   dist/web/lotus-tokens.css        — CSS custom properties
+ *   dist/web/_lotus-tokens.scss      — SCSS variables (replaces hand-maintained _colorPrimitives.scss)
  *   dist/ios/LotusTokens.swift       — Swift enums (UIKit / SwiftUI ready)
  *   dist/android/lotus_tokens.xml    — Android resource values XML
  */
@@ -69,6 +70,75 @@ for (const [groupKey, groupVal] of Object.entries(tokens)) {
       typography[name] = token.$value; // { fontFamily, fontSize: { value, unit }, fontWeight }
     }
   }
+}
+
+// ─── SCSS ────────────────────────────────────────────────────────────────────
+
+// Primitives: color names that follow the {word}-{number} pattern (e.g. grey-500, green-50).
+// Semantics: everything else (text-primary, action-primary, surface-default, etc.).
+const isPrimitive = (name) => /^[a-z]+-\d+$/.test(name);
+
+function buildSCSS() {
+  const primitiveColors = Object.entries(colors).filter(([name]) => isPrimitive(name));
+  const semanticColors = Object.entries(colors).filter(([name]) => !isPrimitive(name));
+
+  const lines = [
+    '// Lotus Design Tokens — generated, do not edit',
+    '// Source: design-tokens/tokens.json',
+    '//',
+    '// Usage (with @use namespace):',
+    "//   @use '@justpark/lotus/dist/web/lotus-tokens' as lotus;",
+    '//   .foo { color: lotus.$text-primary; gap: lotus.$spacing-xs; }',
+    '//',
+    '// Replaces: justpark-ui/src/scss/lotus/_colorPrimitives.scss',
+    '// The semantic layer (_colors.scss) should @use this file instead of _colorPrimitives.',
+    '',
+    '// ─── Primitive colors ────────────────────────────────────────────────────────',
+    '// Raw values only. Do not reference these directly in components —',
+    '// use a semantic token instead.',
+  ];
+
+  for (const [name, val] of primitiveColors) {
+    lines.push(`$${name}: ${val.hex};`);
+  }
+
+  lines.push('');
+  lines.push('// ─── Semantic colors ────────────────────────────────────────────────────────');
+  lines.push('// Purpose-named tokens. These are the values components should reference.');
+
+  for (const [name, val] of semanticColors) {
+    lines.push(`$${name}: ${val.hex};`);
+  }
+
+  lines.push('');
+  lines.push('// ─── Spacing ────────────────────────────────────────────────────────────────');
+
+  for (const [name, val] of Object.entries(spacing)) {
+    lines.push(`$spacing-${name}: ${val.value}${val.unit};`);
+  }
+
+  lines.push('');
+  lines.push('// ─── Border radius ──────────────────────────────────────────────────────────');
+
+  for (const [name, val] of Object.entries(rounded)) {
+    lines.push(`$rounded-${name}: ${val.value}${val.unit};`);
+  }
+
+  lines.push('');
+  lines.push('// ─── Typography ─────────────────────────────────────────────────────────────');
+
+  for (const [name, val] of Object.entries(typography)) {
+    lines.push(`$typography-${name}-font-family: '${val.fontFamily}';`);
+    lines.push(`$typography-${name}-font-size: ${val.fontSize.value}${val.fontSize.unit};`);
+    lines.push(`$typography-${name}-font-weight: ${val.fontWeight};`);
+    if (val.lineHeight !== undefined) {
+      lines.push(`$typography-${name}-line-height: ${val.lineHeight};`);
+    }
+  }
+
+  lines.push('');
+
+  return lines.join('\n');
 }
 
 // ─── CSS ─────────────────────────────────────────────────────────────────────
@@ -238,6 +308,9 @@ ensure(join(ROOT, 'dist', 'android'));
 
 writeFileSync(join(ROOT, 'dist', 'web', 'lotus-tokens.css'), buildCSS());
 console.log('✓ dist/web/lotus-tokens.css');
+
+writeFileSync(join(ROOT, 'dist', 'web', '_lotus-tokens.scss'), buildSCSS());
+console.log('✓ dist/web/_lotus-tokens.scss');
 
 writeFileSync(join(ROOT, 'dist', 'ios', 'LotusTokens.swift'), buildSwift());
 console.log('✓ dist/ios/LotusTokens.swift');
