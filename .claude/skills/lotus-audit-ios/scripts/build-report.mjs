@@ -18,6 +18,12 @@ const figma  = JSON.parse(readFileSync(process.env.FIGMA_JSON   || '/tmp/lotus-f
 const ios    = JSON.parse(readFileSync(process.env.IOS_COLORS   || '/tmp/ios-colors.json', 'utf8'));
 const parity = JSON.parse(readFileSync(process.env.PARITY_JSON  || '/tmp/colour-parity.json', 'utf8'));
 const scan   = JSON.parse(readFileSync(process.env.SCAN_JSON    || '/tmp/ios-scan.json', 'utf8'));
+// Typography parity is optional — if the file is absent, the typography section
+// falls back to the iOS-only listing (pre-typography-variables behaviour).
+let typoParity = null;
+try {
+  typoParity = JSON.parse(readFileSync(process.env.TYPO_PARITY_JSON || '/tmp/typography-parity.json', 'utf8'));
+} catch {}
 
 // --out override
 let outOverride = null;
@@ -31,8 +37,6 @@ const radius = fc('Corner Radius');
 
 const iosSpacing = [['spacingNone',0],['spacingXXXSmall',2],['spacingXXSmall',4],['spacingXSmall',8],['spacingSemiSmall',10],['spacingSmall',12],['spacingMedium',16],['spacingXMedium',20],['spacingLarge',24],['spacingXLarge',32],['spacingXXLarge',40],['spacingXXXLarge',70]];
 const iosRadius = [['radiusNone',0],['radiusXXSmall',1],['radiusXSmall',4],['radiusSmall',8],['radiusXMedium',12],['radiusMedium',16],['radiusXLarge',20],['radiusLarge',24],['radiusFull',32]];
-const iosTypography = [['h1Nunito','NunitoSans-Bold',32],['h1Poppins','Poppins-Bold',32],['h2Nunito','NunitoSans-Bold',24],['h2PoppinsLight','Poppins-Light',23],['h2Poppins','Poppins-Regular',24],['h2PoppinsBold','Poppins-SemiBold',24],['h3','NunitoSans-Regular',20],['bodyLarge','NunitoSans-Regular',18],['bodyLargeBold','NunitoSans-Bold',18],['bodyMedium','NunitoSans-Regular',16],['bodyMediumBold','NunitoSans-Bold',16],['bodySmall','NunitoSans-Regular',14],['bodySmallMedium','NunitoSans-Regular medium',14],['bodySmallBold','NunitoSans-Bold',14],['caption','NunitoSans-Regular',12],['captionBold','NunitoSans-Bold',12],['micro','NunitoSans-Regular',10],['microBold','NunitoSans-Bold',10],['sfSemiBoldFont','System semibold',15],['sfRegularFont','System regular',15]];
-
 // Padding parity
 const padRows = [];
 for (const v of padding.vars) {
@@ -160,13 +164,48 @@ for (const r of radRows) out(`| ${r.figma || '—'} | ${r.figmaVal !== null && r
 out('');
 out('### Typography');
 out('');
-out('> [!warning]');
-out('> Figma has **no typography Variables**. Type styles in Figma live as Text Styles, which the audit script can\'t cross-check programmatically against `LotusTypography.swift`. Token-level parity for typography requires a manual cross-reference.');
-out('');
-out('| iOS const | Family | Size |');
-out('|---|---|---|');
-for (const [n, family, size] of iosTypography) out(`| ${n} | ${family} | ${size}pt |`);
-out('');
+if (typoParity) {
+  const ts = typoParity.summary;
+  out(`Figma's \`Typography\` collection now defines atomic tokens (font-size/*, font-family/*, font-style/*, line-height/*). iOS \`LotusTypography.swift\` defines composed styles. The audit decomposes each iOS style into its (family, size, weight) atoms and checks each atom against the Figma sets.`);
+  out('');
+  out('| Status | Count |');
+  out('|---|---|');
+  out(`| ✅ All atoms in Figma | ${ts.iosMatch} |`);
+  out(`| ❌ One or more atoms not in Figma | ${ts.iosMismatch} |`);
+  out(`| ⚠️ Figma sizes not used by any iOS style | ${ts.figmaSizesNotUsed} |`);
+  out(`| ⚠️ Figma weights not used by any iOS style | ${ts.figmaWeightsNotUsed} |`);
+  out('');
+  out('#### Figma typography tokens');
+  out('');
+  out('| Category | Tokens |');
+  out('|---|---|');
+  out(`| \`font-size/*\` | ${Object.entries(typoParity.figma.sizes).map(([n,v]) => `\`${n}\` = ${v}`).join(', ')} |`);
+  out(`| \`line-height/*\` | ${Object.entries(typoParity.figma.lineHeights).map(([n,v]) => `\`${n}\` = ${v}`).join(', ')} |`);
+  out(`| \`font-family/*\` | ${Object.entries(typoParity.figma.families).map(([n,v]) => `\`${n}\` = "${v}"`).join(', ')} |`);
+  out(`| \`font-style/*\` | ${Object.entries(typoParity.figma.weights).map(([n,v]) => `\`${n}\` = "${v}"`).join(', ')} |`);
+  out('');
+  out('#### iOS styles vs Figma');
+  out('');
+  out('| iOS const | Family | Weight | Size | Issues |');
+  out('|---|---|---|---|---|');
+  for (const r of typoParity.iosRows) {
+    const issueCol = r.status === 'match' ? '✅' : r.issues.map(i => `❌ ${i}`).join('<br>');
+    out(`| ${r.name} | ${r.family} | ${r.weight} | ${r.size}pt | ${issueCol} |`);
+  }
+  out('');
+  if (typoParity.figmaNotUsed.sizes.length || typoParity.figmaNotUsed.weights.length || typoParity.figmaNotUsed.families.length) {
+    out('#### Figma tokens iOS doesn\'t use');
+    out('');
+    if (typoParity.figmaNotUsed.sizes.length)    out(`- **Sizes:** ${typoParity.figmaNotUsed.sizes.map(s => `\`${s.name}\` = ${s.value}`).join(', ')}`);
+    if (typoParity.figmaNotUsed.families.length) out(`- **Families:** ${typoParity.figmaNotUsed.families.map(s => `\`${s.name}\` = "${s.value}"`).join(', ')}`);
+    if (typoParity.figmaNotUsed.weights.length)  out(`- **Weights:** ${typoParity.figmaNotUsed.weights.map(s => `\`${s.name}\` = "${s.value}"`).join(', ')}`);
+    out('');
+  }
+} else {
+  out('> [!warning]');
+  out('> No typography parity data available. Run `scripts/parse-ios-typography.mjs` and `scripts/typography-parity.mjs` to populate this section.');
+  out('');
+}
 out('---');
 out('');
 
@@ -302,7 +341,7 @@ out('');
 out(`- **Scan roots:** ${scan.scanRoots.map(r => `\`${r}\``).join(', ')}`);
 out('- **Excluded:** `Lotus/`, `*Tests/`, `Ampli/`, `Screens/Debug/Lotus/`.');
 out('- **Compliance counted by reference**, not file. Ratios are aggregate-of-refs, not aggregate-of-files.');
-out('- **Token-parity scope:** colour, padding, corner radius. Typography listed but not auto-checked (Figma stores type as Text Styles, not Variables).');
+out('- **Token-parity scope:** colour, padding, corner radius, typography (when Figma `Typography` collection is present). Figma\'s typography is atomic (`font-size/*`, `font-family/*`, `font-style/*`); iOS has composed styles. The audit decomposes each iOS style and checks each atom individually.');
 out('- **Colour-space conversion:** iOS asset catalogs are tagged `display-p3`. The audit applies the standard P3→sRGB matrix transform (D65 white point) so the displayed values can be compared apples-to-apples with Figma\'s sRGB hex. Both displayed and raw bytes are shown in tables for transparency.');
 out('- **Name-mapping is heuristic.** Figma uses kebab-case (`Primary-Default`); iOS uses camelCase (`PrimaryDefault`). Names are normalised for comparison; fundamental renames or restructured collections surface as `missing-ios` rows.');
 out('- **Component-level parity not assessed in this version.** The skill does not yet detect a vanilla `Button` where `ButtonPrimary` should be used.');
