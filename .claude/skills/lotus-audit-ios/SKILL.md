@@ -5,10 +5,10 @@ description: >
   canonical Figma source of truth. Compares Figma variables (colour, padding,
   radius) to the iOS Swift token definitions and asset catalog, scans the iOS
   app for hardcoded values vs token usage, and writes a dated Markdown report
-  into Olly's Obsidian vault. Use this skill when Olly says `/lotus-audit-ios`,
-  asks to "audit Lotus on iOS", "run a fresh iOS Lotus audit", "check Lotus
-  adoption", or "regenerate the iOS Lotus audit". One-shot per run; no
-  background scheduling.
+  to a repo-relative path by default (`audits/ios/YYYY-MM-DD.md`, gitignored).
+  Use this skill when the user says `/lotus-audit-ios`, asks to "audit Lotus
+  on iOS", "run a fresh iOS Lotus audit", "check Lotus adoption", or
+  "regenerate the iOS Lotus audit". One-shot per run; no background scheduling.
 allowed-tools:
   - Bash
   - Read
@@ -31,9 +31,36 @@ questions:
    hardcoded literals or legacy colour systems? Broken down per flow and
    per screen.
 
-Output is a dated Markdown file in Olly's Obsidian vault at
-`Areas/JustPark/Projects/Lotus/Audits/YYYY-MM-DD — iOS.md`. Every run produces
-a new file — never overwrite previous audits.
+Output is a dated Markdown file. Every run produces a new file — never
+overwrite previous audits. See **Output destinations** below for path resolution.
+
+## Output destinations
+
+The skill resolves three independent destinations, in this priority:
+
+1. **Primary path** (always written):
+   - If the user passes `--out <path>` → that exact path.
+   - Else: `<lotus-repo-root>/audits/ios/YYYY-MM-DD.md`. The Lotus repo root
+     is the directory three levels up from this `SKILL.md` file. The
+     `audits/` directory is gitignored — generated reports don't pollute
+     git history. To preserve a milestone audit in history, the user can
+     `git add -f audits/ios/<file>.md` deliberately.
+
+2. **Mirror copy** (optional, written *in addition* to primary):
+   - If the env var `LOTUS_AUDIT_MIRROR` is set and points at an existing
+     directory, write a second copy to `${LOTUS_AUDIT_MIRROR%/}/YYYY-MM-DD.md`.
+   - This is the path users set in their shell rc to also pipe audits into a
+     personal knowledge system — Obsidian, Notion via webhook, Slack via
+     drop folder, etc. Empty / unset = no mirror.
+
+3. **Index update** (optional, only if mirror is in an Obsidian vault):
+   - If `LOTUS_AUDIT_MIRROR` resolves under
+     `~/Documents/Olly's Brain/Areas/JustPark/Projects/Lotus/Audits/`, also
+     append a wikilink to that vault's `_Index.md`. This is Olly-specific
+     vault wiring and stays opt-in via the env var.
+
+If the same date already has an audit at the primary path, suffix with `-2`,
+`-3`, etc. before writing.
 
 ## Source of truth
 
@@ -290,19 +317,65 @@ Roll up by:
 Read `flows.yaml` from the same directory as this SKILL.md to get the
 flow mapping.
 
-Generate a Markdown report at:
+Resolve output paths per the **Output destinations** section near the top:
 
+```bash
+LOTUS_REPO=$(cd "$SKILL_DIR/../../.." && pwd)
+DATE=$(date +%F)
+
+# Primary path
+if [ -n "$OUT_OVERRIDE" ]; then
+  PRIMARY="$OUT_OVERRIDE"
+else
+  PRIMARY="$LOTUS_REPO/audits/ios/$DATE.md"
+fi
+
+# Suffix -2, -3 etc. if today's file already exists.
+# Capture the base (sans extension) once so each iteration appends to the
+# original path, not the previously-suffixed one.
+PRIMARY_BASE="${PRIMARY%.md}"
+i=2
+while [ -e "$PRIMARY" ]; do
+  PRIMARY="$PRIMARY_BASE-$i.md"
+  i=$((i+1))
+done
+
+mkdir -p "$(dirname "$PRIMARY")"
 ```
-~/Documents/Olly's Brain/Areas/JustPark/Projects/Lotus/Audits/YYYY-MM-DD — iOS.md
+
+Write the compiled Markdown to `$PRIMARY`.
+
+Then handle the optional mirror:
+
+```bash
+if [ -n "$LOTUS_AUDIT_MIRROR" ] && [ -d "$LOTUS_AUDIT_MIRROR" ]; then
+  MIRROR="${LOTUS_AUDIT_MIRROR%/}/$DATE.md"
+  MIRROR_BASE="${MIRROR%.md}"
+  i=2
+  while [ -e "$MIRROR" ]; do
+    MIRROR="$MIRROR_BASE-$i.md"
+    i=$((i+1))
+  done
+  cp "$PRIMARY" "$MIRROR"
+fi
 ```
 
-(Where `YYYY-MM-DD` is today.)
+**Vault-index update (only if the mirror lands in Olly's vault):**
 
-If the file already exists for today, suffix with `-2`, `-3`, etc.
+If `$LOTUS_AUDIT_MIRROR` resolves under
+`~/Documents/Olly's Brain/Areas/JustPark/Projects/Lotus/Audits/`, append a
+bullet to that vault's `_Index.md` under `## Audits`. Derive the wikilink
+target from the actual mirror filename (which may have a `-2`, `-3`, etc.
+suffix from the collision-check loop) — never hardcode the date format:
 
-After writing, append a bullet to
-`~/Documents/Olly's Brain/Areas/JustPark/Projects/Lotus/_Index.md` under the
-`## Audits` section: `- [[Audits/YYYY-MM-DD — iOS]] — auto-generated`.
+```bash
+MIRROR_NAME=$(basename "$MIRROR" .md)
+echo "- [[Audits/$MIRROR_NAME]] — auto-generated" >> "$INDEX_PATH"
+```
+
+Skip the index update for any other mirror destination — the skill only
+knows the Obsidian-vault wiring; other knowledge bases (Notion, Slack drop
+folders, etc.) handle their own indexing.
 
 ## Report structure
 
@@ -404,7 +477,13 @@ parity not assessed in v1, only token-level).
 - **Always prompt for Lotus-tab-focused confirmation** in Phase 1 prereqs.
   Don't assume.
 - **Each run produces a new dated file.** Never overwrite previous audits.
-  Never modify the manual `Lotus — iOS Audit.md`.
+  Never modify any pre-existing manually-authored audit (e.g. a vault note
+  titled "Lotus — iOS Audit.md"); the skill writes only to its own dated
+  `audits/ios/YYYY-MM-DD.md` filenames.
+- **Default output is repo-relative and gitignored.** Don't write to a vault
+  path unless the user has explicitly opted in via `--out` or
+  `LOTUS_AUDIT_MIRROR`. The skill is a team tool — its default behaviour
+  must work for anyone who clones the repo.
 - **Read-only on `parkhub/ios` and the Lotus Figma file.** This skill never
   writes to either.
 - **No PAT, no API.** Token data comes via figma-cli's local CDP connection,
@@ -413,14 +492,16 @@ parity not assessed in v1, only token-level).
   can disrupt the user's full-screen workspace. The user is responsible for
   focusing the Lotus tab; the skill operates on whatever's focused.
 - **Spell out acronyms on first use** in the report (e.g. "Search Results
-  Page (SRP)") per Olly's vault rules.
-- **Use Obsidian wikilinks** when referencing other vault notes
-  (e.g. `[[Lotus — Audit]]`).
+  Page (SRP)").
+- **Use Obsidian wikilinks** (`[[Note Name]]`) only when the report is being
+  written to a vault destination. For repo-local primary output, prefer
+  plain Markdown links — Obsidian-only syntax renders awkwardly elsewhere.
 
 ## Trend comparison (optional)
 
-If `Audits/` already contains an audit dated within the last 30 days, include
-a "Drift since [previous date]" sub-section in **Notable findings** showing:
+If the directory containing the primary output already has an audit dated
+within the last 30 days, include a "Drift since [previous date]"
+sub-section in **Notable findings** showing:
 
 - Tokenisation ratio change (overall + per flow)
 - New violation files
