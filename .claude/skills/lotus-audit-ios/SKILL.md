@@ -330,10 +330,13 @@ else
   PRIMARY="$LOTUS_REPO/audits/ios/$DATE.md"
 fi
 
-# Suffix -2, -3 etc. if today's file already exists
+# Suffix -2, -3 etc. if today's file already exists.
+# Capture the base (sans extension) once so each iteration appends to the
+# original path, not the previously-suffixed one.
+PRIMARY_BASE="${PRIMARY%.md}"
 i=2
 while [ -e "$PRIMARY" ]; do
-  PRIMARY="${PRIMARY%.md}-$i.md"
+  PRIMARY="$PRIMARY_BASE-$i.md"
   i=$((i+1))
 done
 
@@ -347,9 +350,10 @@ Then handle the optional mirror:
 ```bash
 if [ -n "$LOTUS_AUDIT_MIRROR" ] && [ -d "$LOTUS_AUDIT_MIRROR" ]; then
   MIRROR="${LOTUS_AUDIT_MIRROR%/}/$DATE.md"
+  MIRROR_BASE="${MIRROR%.md}"
   i=2
   while [ -e "$MIRROR" ]; do
-    MIRROR="${MIRROR%.md}-$i.md"
+    MIRROR="$MIRROR_BASE-$i.md"
     i=$((i+1))
   done
   cp "$PRIMARY" "$MIRROR"
