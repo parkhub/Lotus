@@ -109,14 +109,19 @@ ripgrep patterns, mermaid generation, output-path resolution).
 flowchart LR
   A[fetch-figma-tokens.mjs] --> P1[lotus-figma-tokens.json]
   B[parse-ios-colors.mjs] --> P2[ios-colors.json]
+  T[parse-ios-typography.mjs] --> P5[ios-typography.json]
   P1 --> C[colour-parity.mjs]
   P2 --> C
   C --> P3[colour-parity.json]
+  P1 --> Tp[typography-parity.mjs]
+  P5 --> Tp
+  Tp --> P6[typography-parity.json]
   D[scan-ios.mjs] --> P4[ios-scan.json]
   P1 --> E[build-report.mjs]
   P2 --> E
   P3 --> E
   P4 --> E
+  P6 --> E
   E --> R[YYYY-MM-DD.md]
 ```
 
@@ -133,12 +138,14 @@ Uses figma-cli to evaluate JS in Figma Desktop's plugin context, walks
 `VARIABLE_ALIAS` references, and writes a flat JSON of all collections /
 modes / variables with values resolved to hex.
 
-Lotus has 4 collections (Colour Primitives, Colour, Padding, Corner Radius)
-and ~137 variables. The semantic `Colour` collection has both Light Mode
-and Dark Mode; the others are single-mode.
+Lotus has 5 collections (Colour Primitives, Colour, Padding, Corner Radius,
+Typography) and ~160 variables. The semantic `Colour` collection has both
+Light Mode and Dark Mode; the others are single-mode.
 
-**Figma has no Typography variables.** Type styles live as Text Styles —
-the audit lists iOS typography but cannot auto-compare to Figma.
+The `Typography` collection is **atomic**: separate variables for
+`font-size/*`, `line-height/*`, `font-family/*`, `font-style/*` (weight)
+rather than composed text styles. Phase 3.5 (typography-parity) decomposes
+iOS composed styles to compare against these atoms.
 
 If the script exits non-zero:
 1. Re-prompt the user to confirm the Lotus tab is focused in Figma Desktop.
@@ -163,8 +170,22 @@ thing to compare against Figma; the raw value is for transparency.
 
 iOS Swift token sources at `$IOS_REPO/Lotus/Sources/Lotus/`:
 `LotusColours.swift` · `LotusTypography.swift` · `LotusSpacing.swift` · `LotusCorners.swift`.
-Read these for naming reference; their *values* (for colours) come from the
-asset catalog parsed above.
+Colour values come from the asset catalog (parsed above). Spacing and
+radius values are read directly from the Swift constants by
+`build-report.mjs`. Typography is parsed in the next sub-step.
+
+### Phase 2.5 — Parse iOS typography
+
+```bash
+node "$SKILL_DIR/scripts/parse-ios-typography.mjs" \
+  "$IOS_REPO/Lotus/Sources/Lotus/LotusTypography.swift" \
+  > /tmp/ios-typography.json
+```
+
+Extracts `(name, family, weight, size)` tuples from the `Font.custom(...)`,
+`UIFont(name:size:)`, and `Font.system(size:weight:)` calls in the Swift
+file. Decomposes PostScript names like `NunitoSans-Bold` into family
+("Nunito Sans") + weight ("Bold").
 
 ## Phase 3 — Diff Figma vs iOS (token parity)
 
@@ -185,6 +206,20 @@ as `match` / `dark-only-mismatch` / `mismatch` / `missing-ios`, and lists
 Padding and Corner Radius parity is computed by `build-report.mjs` directly
 from the Figma JSON + the embedded iOS spacing/radius constants — no
 separate script.
+
+### Phase 3.5 — Diff Figma typography vs iOS typography
+
+```bash
+node "$SKILL_DIR/scripts/typography-parity.mjs" \
+  /tmp/lotus-figma-tokens.json \
+  /tmp/ios-typography.json \
+  > /tmp/typography-parity.json
+```
+
+Decomposes each iOS composed style into `(family, size, weight)` atoms and
+checks each atom against Figma's `font-size/*`, `font-family/*`, and
+`font-style/*` sets. Reports per-iOS-style status plus the inverse
+direction (Figma sizes/families/weights iOS doesn't use).
 
 ## Phase 4 — Scan iOS app for adoption
 
@@ -292,6 +327,9 @@ Not implemented yet — file as separate PRs:
   directory is the natural input.
 - **Component-level parity** — detect e.g. `Button(...)` where `ButtonPrimary`
   should be used. v1 is token-only.
-- **Typography parity via Figma Text Styles** — Figma stores type as Text
-  Styles, not Variables. A future fetch step could pull text styles via the
-  Figma plugin and let the audit cross-check `LotusTypography.swift`.
+- **Line-height parity** — Figma defines `line-height/*` atoms but iOS
+  `LotusTypography.swift` doesn't expose line height per style (relies on
+  default spacing). Comparison requires changes on the iOS side first.
+- **Composed text-style parity** — Figma may add composed `text/*` tokens
+  that bundle family + size + weight + line-height. The audit currently
+  compares atoms only.
