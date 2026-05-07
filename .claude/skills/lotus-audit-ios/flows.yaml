@@ -1,0 +1,65 @@
+# Lotus iOS audit — flow → screens mapping.
+#
+# `parkhub/ios/JustPark/Screens/` is a flat folder list with no flow grouping
+# in the code. This file maps screens into product flows for per-flow rollup
+# in the audit report.
+#
+# Folders not listed go to "Unmapped" so nothing is silently dropped.
+# Edit this file as the app evolves.
+
+flows:
+  Auth & Onboarding:
+    - Login
+    - SignInV2
+    - ResetPasswordV2
+    - PhoneNumber
+    - Onboarding
+    - Consents
+    - Splash
+    - UnsupportedVersion
+
+  Search & Discovery:
+    - Search
+    - Map
+    - MapSearchV2
+    - SpaceDetails
+    - AirportFitlerInterstitial
+
+  Booking:
+    - Bookings
+    - Checkout
+    - CheckoutV2
+    - Payment
+    - PromoCode
+    - ReservationV2
+    - Cancellation
+    - CoverInsurance
+    - Picker
+
+  On-Demand:
+    - OnDemandFlow
+    - CodeScanner
+    - DialogNotification
+    - DirectCarrierBilling
+
+  Account:
+    - Menu
+    - Profile
+    - Vehicle
+    - AutoPay
+    - Reviews
+    - Help
+
+  Home:
+    - Home
+
+  Infra & Misc:
+    - JPWebView
+    - Debug
+
+# Folders excluded from compliance scoring (still listed in report under
+# "Excluded" for transparency, but don't count toward flow %).
+exclude:
+  # The in-app design system showcase. Uses tokens by design — would inflate
+  # Debug compliance numbers if counted.
+  - Debug/Lotus
