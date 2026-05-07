@@ -16,6 +16,7 @@ allowed-tools:
   - Glob
   - Write
   - Edit
+  - Task
 ---
 
 # Lotus iOS Audit
@@ -99,157 +100,187 @@ and stop — do not attempt workarounds.
 
 ## Pipeline
 
-The audit is a four-stage data pipeline followed by report assembly.
-Each stage is a self-contained script in `scripts/` — Claude's job is to
-run them in order and surface progress to the user. Scripts handle the
-fiddly bits (P3→sRGB conversion, alias resolution, name normalisation,
-ripgrep patterns, mermaid generation, output-path resolution).
+The audit runs in four stages. Stages 1 and 2 are pure data extraction and
+the four stage-1 scripts have **no dependencies on each other** — the
+orchestrator should invoke them in parallel (one message containing four
+Bash tool calls). Stage 2 analyses the data, also parallelisable.
+Stage 3 is sub-agent–driven (per-file fix proposals). Stage 4 assembles
+the final report.
 
 ```mermaid
 flowchart LR
-  A[fetch-figma-tokens.mjs] --> P1[lotus-figma-tokens.json]
-  B[parse-ios-colors.mjs] --> P2[ios-colors.json]
-  T[parse-ios-typography.mjs] --> P5[ios-typography.json]
-  P1 --> C[colour-parity.mjs]
-  P2 --> C
-  C --> P3[colour-parity.json]
-  P1 --> Tp[typography-parity.mjs]
-  P5 --> Tp
-  Tp --> P6[typography-parity.json]
-  D[scan-ios.mjs] --> P4[ios-scan.json]
-  P1 --> E[build-report.mjs]
-  P2 --> E
-  P3 --> E
-  P4 --> E
-  P6 --> E
-  E --> R[YYYY-MM-DD.md]
+  subgraph S1["Stage 1 — extract (parallel)"]
+    A[fetch-figma-tokens.mjs] --> P1[lotus-figma-tokens.json]
+    B[parse-ios-colors.mjs] --> P2[ios-colors.json]
+    T[parse-ios-typography.mjs] --> P5[ios-typography.json]
+    D[scan-ios.mjs] --> P4[ios-scan.json]
+  end
+  subgraph S2["Stage 2 — analyse (parallel)"]
+    P1 --> C[colour-parity.mjs] --> P3[colour-parity.json]
+    P2 --> C
+    P1 --> Tp[typography-parity.mjs] --> P6[typography-parity.json]
+    P5 --> Tp
+    P1 --> Tc[token-candidates.mjs] --> P7[token-candidates.json]
+    P2 --> Tc
+  end
+  subgraph S3["Stage 3 — sub-agents (parallel)"]
+    P4 --> SA[10× general-purpose Task agents]
+    SA --> P8[fix-proposals.json]
+  end
+  subgraph S4["Stage 4 — report"]
+    P1 & P2 & P3 & P4 & P6 & P7 & P8 --> E[build-report.mjs] --> R[YYYY-MM-DD.md]
+  end
 ```
 
 Set `SKILL_DIR=$(cd "$(dirname "$BASH_SOURCE")/.."; pwd)` mentally — it's
 the directory of this SKILL.md. All script paths below are relative to it.
 
-## Phase 1 — Fetch canonical Figma tokens
+## Stage 1 — Extract data (run all four in parallel)
+
+These four scripts have **no dependencies on each other**. Invoke them in
+a single message with four parallel `Bash` tool calls. Total wall-clock
+time is gated by the slowest (`scan-ios` or `fetch-figma-tokens`).
 
 ```bash
+# Send these as four parallel Bash tool calls in one message:
+
 node "$SKILL_DIR/scripts/fetch-figma-tokens.mjs" /tmp/lotus-figma-tokens.json
-```
-
-Uses figma-cli to evaluate JS in Figma Desktop's plugin context, walks
-`VARIABLE_ALIAS` references, and writes a flat JSON of all collections /
-modes / variables with values resolved to hex.
-
-Lotus has 5 collections (Colour Primitives, Colour, Padding, Corner Radius,
-Typography) and ~160 variables. The semantic `Colour` collection has both
-Light Mode and Dark Mode; the others are single-mode.
-
-The `Typography` collection is **atomic**: separate variables for
-`font-size/*`, `line-height/*`, `font-family/*`, `font-style/*` (weight)
-rather than composed text styles. Phase 3.5 (typography-parity) decomposes
-iOS composed styles to compare against these atoms.
-
-If the script exits non-zero:
-1. Re-prompt the user to confirm the Lotus tab is focused in Figma Desktop.
-2. Retry once.
-3. If retry fails, abort and surface the error.
-
-## Phase 2 — Parse iOS asset catalog into hex (with P3→sRGB conversion)
-
-```bash
 node "$SKILL_DIR/scripts/parse-ios-colors.mjs" \
   "$IOS_REPO/Lotus/Sources/Lotus/Assets.xcassets/Lotus-Colour-Pallet" \
   > /tmp/ios-colors.json
-```
-
-Walks every `*.colorset/Contents.json` in the catalog. For each colorset,
-extracts Light + Dark appearance values, parses both float (`0.234`) and
-hex-byte (`0x37`) component formats, and applies a P3→sRGB matrix transform
-(D65 white point) when `color-space: display-p3`. Output includes both the
-**displayed sRGB hex** (what users actually see on a P3-capable iPhone) and
-the **raw hex bytes** stored in the file — the displayed value is the right
-thing to compare against Figma; the raw value is for transparency.
-
-iOS Swift token sources at `$IOS_REPO/Lotus/Sources/Lotus/`:
-`LotusColours.swift` · `LotusTypography.swift` · `LotusSpacing.swift` · `LotusCorners.swift`.
-Colour values come from the asset catalog (parsed above). Spacing and
-radius values are read directly from the Swift constants by
-`build-report.mjs`. Typography is parsed in the next sub-step.
-
-### Phase 2.5 — Parse iOS typography
-
-```bash
 node "$SKILL_DIR/scripts/parse-ios-typography.mjs" \
   "$IOS_REPO/Lotus/Sources/Lotus/LotusTypography.swift" \
   > /tmp/ios-typography.json
-```
-
-Extracts `(name, family, weight, size)` tuples from the `Font.custom(...)`,
-`UIFont(name:size:)`, and `Font.system(size:weight:)` calls in the Swift
-file. Decomposes PostScript names like `NunitoSans-Bold` into family
-("Nunito Sans") + weight ("Bold").
-
-## Phase 3 — Diff Figma vs iOS (token parity)
-
-```bash
-node "$SKILL_DIR/scripts/colour-parity.mjs" \
-  /tmp/lotus-figma-tokens.json \
-  /tmp/ios-colors.json \
-  > /tmp/colour-parity.json
-```
-
-Normalises Figma's kebab-case names (`Primary-Default`) and iOS's camelCase
-asset names (`PrimaryDefault`) for comparison. Applies known structural
-remaps (e.g. `Brand/Primary → Brand.JustparkGreen`,
-`Surface/Primary → Surface.White`). Categorises every Figma semantic colour
-as `match` / `dark-only-mismatch` / `mismatch` / `missing-ios`, and lists
-`iosOnlyTokens` separately.
-
-Padding and Corner Radius parity is computed by `build-report.mjs` directly
-from the Figma JSON + the embedded iOS spacing/radius constants — no
-separate script.
-
-### Phase 3.5 — Diff Figma typography vs iOS typography
-
-```bash
-node "$SKILL_DIR/scripts/typography-parity.mjs" \
-  /tmp/lotus-figma-tokens.json \
-  /tmp/ios-typography.json \
-  > /tmp/typography-parity.json
-```
-
-Decomposes each iOS composed style into `(family, size, weight)` atoms and
-checks each atom against Figma's `font-size/*`, `font-family/*`, and
-`font-style/*` sets. Reports per-iOS-style status plus the inverse
-direction (Figma sizes/families/weights iOS doesn't use).
-
-## Phase 4 — Scan iOS app for adoption
-
-```bash
-node "$SKILL_DIR/scripts/scan-ios.mjs" \
-  "$IOS_REPO" \
-  "$SKILL_DIR/flows.yaml" \
+node "$SKILL_DIR/scripts/scan-ios.mjs" "$IOS_REPO" "$SKILL_DIR/flows.yaml" \
   > /tmp/ios-scan.json
 ```
 
-Walks `JustPark/Screens`, `JustPark/Shared`, `Shared`, `Frameworks`,
-`Widget`, `NotificationsContent`, `NotificationsService`, `JPIntents`
-(excluding `Lotus/`, `*Tests/`, `Ampli/`, `Screens/Debug/Lotus/`).
+What each does:
 
-For each Swift file, counts:
+- **`fetch-figma-tokens.mjs`** — drives figma-cli against the running Figma
+  Desktop, walks `VARIABLE_ALIAS` references, writes resolved hex per mode.
+  Lotus currently has 5 collections (Colour Primitives, Colour, Padding,
+  Corner Radius, Typography) and ~160 variables.
+- **`parse-ios-colors.mjs`** — walks every `*.colorset/Contents.json`,
+  parses both float and `0xRR` component formats, applies a P3→sRGB matrix
+  transform (D65) when `color-space: display-p3` so the hex matches what
+  users see on a P3-capable iPhone. Outputs both displayed and raw hex.
+- **`parse-ios-typography.mjs`** — extracts `(name, family, weight, size)`
+  tuples from `Font.custom(...)`, `UIFont(name:size:)`, and
+  `Font.system(size:weight:)` calls.
+- **`scan-ios.mjs`** — counts compliant, legacy, and hardcoded references
+  across `JustPark/Screens`, `JustPark/Shared`, `Shared`, `Frameworks`,
+  `Widget`, `NotificationsContent`, `NotificationsService`, `JPIntents`.
+  Aggregates per-file, per-screen, per-flow.
 
-- **Compliant:** `LotusColours.*`, `LotusTypography.*`, `LotusSpacing.spacing*`,
-  `LotusCorners.radius*`.
-- **Legacy:** `.jp*` (the 2017 palette), `UIColor.Semantic.*` /
-  `UIColor.Primitive.*` (Design 2.0 intermediate).
-- **Hardcoded literals:** `UIColor(red:...)`, `Color(.system…)`,
-  `.foregroundColor(.white)`, `Font.system(size:)`, `.padding(<n>)`,
-  `.cornerRadius(<n>)`, etc. The full pattern set is in `scan-ios.mjs`'s
-  `PATTERNS` constant.
+If `fetch-figma-tokens` exits non-zero:
+1. Re-prompt the user to confirm the Lotus tab is focused in Figma Desktop.
+2. Retry once. If retry fails, abort and surface the error.
 
-Output JSON aggregates by file, by screen folder, by flow (per
-`flows.yaml`), and totals. Includes `worstFiles` (top 25 by violation count)
-and `topAffected` per pattern.
+## Stage 2 — Analyse (run all three in parallel)
 
-## Phase 5 — Compile and write report
+```bash
+# Send these as three parallel Bash tool calls in one message:
+
+node "$SKILL_DIR/scripts/colour-parity.mjs" \
+  /tmp/lotus-figma-tokens.json /tmp/ios-colors.json \
+  > /tmp/colour-parity.json
+
+node "$SKILL_DIR/scripts/typography-parity.mjs" \
+  /tmp/lotus-figma-tokens.json /tmp/ios-typography.json \
+  > /tmp/typography-parity.json
+
+node "$SKILL_DIR/scripts/token-candidates.mjs" \
+  "$IOS_REPO" /tmp/lotus-figma-tokens.json /tmp/ios-colors.json \
+  > /tmp/token-candidates.json
+```
+
+- **`colour-parity.mjs`** — Figma↔iOS colour comparison with name
+  normalisation (kebab vs camel), known structural remaps, status per
+  Figma semantic colour: match / dark-only-mismatch / mismatch /
+  missing-ios; plus iOS-only colours.
+- **`typography-parity.mjs`** — decomposes iOS composed styles into atoms
+  and checks each atom against Figma's `font-size/*`, `font-family/*`,
+  `font-style/*` sets.
+- **`token-candidates.mjs`** — finds hardcoded values used N+ times in iOS
+  code that aren't already tokens. Classifies each as
+  `use-existing-token` (adoption gap), `near-miss` (1pt off — likely
+  typo), or `new-candidate` (worth proposing as a Figma token).
+  Excludes colour-system definition files (`UIColor+JP.swift`,
+  `UIColor+Design2.0.swift`, etc.) — those define colours, they
+  shouldn't surface as candidates.
+
+Padding and Corner Radius parity is computed by `build-report.mjs`
+directly from the Figma JSON + the iOS spacing/radius constants —
+no separate analyser script.
+
+## Stage 3 — Sub-agent fix proposals (parallel)
+
+This stage uses the `Task` tool to spawn one **general-purpose** sub-agent
+per worst-offender file. Each sub-agent reads the file, considers the
+available Lotus tokens, and proposes concrete migrations. Spawn all
+sub-agents in **a single message with multiple Task tool calls** so they
+run in parallel.
+
+**How many?** Read `/tmp/ios-scan.json`, take `worstFiles[0..9]` (top 10
+by violation count). Skip files where `violations < 5` — too small to be
+worth the round-trip.
+
+**Sub-agent prompt template** (substitute the variables in `{...}`):
+
+> ```
+> You are reviewing a single Swift file in the JustPark iOS app for migration
+> away from legacy / hardcoded styling and toward the Lotus design system.
+>
+> File: {abs-path}
+> Total violations the audit detected in this file: {violation_count}.
+>
+> The available Lotus token namespaces (read from
+> {ios-repo}/Lotus/Sources/Lotus/) are:
+> - LotusColours (asset-catalog-backed, organised by Brand/Surface/Text/Border/Action/Alerts)
+> - LotusTypography (Font and UIFont type styles)
+> - LotusSpacing (CGFloat constants: spacingNone..spacingXXXLarge)
+> - LotusCorners (CGFloat constants: radiusNone..radiusFull)
+>
+> Read the file at the path above. For each violation you find — `.jp*` palette
+> usage, `UIColor(red:green:blue:)` literals, `Font.system(size:)`, `.padding(<n>)`,
+> `.cornerRadius(<n>)`, `UIColor.Semantic.*`, etc. — propose the concrete migration.
+>
+> Output STRICTLY as JSON (no other prose), structured as:
+> [
+>   {
+>     "line": <line number>,
+>     "current": "<exact snippet>",
+>     "proposed": "<exact replacement snippet>",
+>     "tokenUsed": "<LotusXxx.Yyy>",
+>     "confidence": "high"|"medium"|"low",
+>     "note": "<optional caveat — e.g. P3-vs-sRGB shift, name disambiguation>"
+>   }
+> ]
+>
+> Cap at 15 suggestions per file. If you can't determine the right token for a
+> violation, omit it rather than guessing. Output ONLY the JSON array. No prose.
+> ```
+
+**Aggregation:** when sub-agents return, parse each JSON response and
+collect into a single `/tmp/fix-proposals.json` of shape:
+
+```json
+{
+  "generatedAt": "<ISO timestamp>",
+  "proposals": [
+    { "file": "<rel path>", "suggestions": [ ... ], "error": "<if sub-agent failed>" }
+  ]
+}
+```
+
+Use the `Write` tool to write the aggregated JSON. `build-report.mjs`
+will pick it up automatically and render a "Suggested fixes" section.
+
+If the orchestrator can't spawn Task agents (skill running without Task
+permission), skip Stage 3 — `build-report.mjs` degrades gracefully.
+
+## Stage 4 — Compile and write report
 
 ```bash
 node "$SKILL_DIR/scripts/build-report.mjs"
@@ -257,9 +288,13 @@ node "$SKILL_DIR/scripts/build-report.mjs"
 node "$SKILL_DIR/scripts/build-report.mjs" --out "/some/path/audit.md"
 ```
 
-Reads the four JSON outputs from earlier phases (paths configurable via
-`FIGMA_JSON`, `IOS_COLORS`, `PARITY_JSON`, `SCAN_JSON` env vars; defaults
-to `/tmp/`). Writes the assembled Markdown to:
+Reads all earlier outputs (paths configurable via env vars: `FIGMA_JSON`,
+`IOS_COLORS`, `PARITY_JSON`, `SCAN_JSON`, `TYPO_PARITY_JSON`,
+`CANDIDATES_JSON`, `FIX_PROPOSALS_JSON`; defaults to `/tmp/`). Optional
+inputs (typography parity, candidates, fix proposals) degrade gracefully
+if missing.
+
+Writes the assembled Markdown to:
 
 1. **Primary:** `<lotus-repo>/audits/ios/YYYY-MM-DD.md` — the script
    resolves the repo root from its own location. Override via `--out`.
@@ -285,18 +320,27 @@ The output sections, mermaid diagrams, and prose are all assembled by
 6. `## Adoption by screen` — table sorted by violation count
 7. `## Top violations` — pattern counts + worst-offender files
 8. `## Legacy colour systems` — `.jp*` and Design 2.0 hot spots
-9. `## Notable findings` — Critical / Structural / Type system
-10. `## Recommendations` — primary recommendation is the iOS P3→sRGB
+9. `## Token candidates from iOS` — repeatedly-used hardcoded values
+   classified as use-existing-token / near-miss / new-candidate
+   (only present if `token-candidates.json` was produced)
+10. `## Suggested fixes — worst-offender files` — concrete migration
+    suggestions per file from Stage 3 sub-agents (only present if
+    `fix-proposals.json` was produced)
+11. `## Notable findings` — Critical / Structural / Type system
+12. `## Recommendations` — primary recommendation is the iOS P3→sRGB
     migration, followed by other lower-priority items
-11. `## Methodology + caveats`
+13. `## Methodology + caveats`
 
 To change the report shape, edit `build-report.mjs`. The SKILL.md doesn't
 need to know — it just runs the pipeline.
 
 ## Important rules
 
-- **Always prompt for Lotus-tab-focused confirmation** in Phase 1 prereqs.
-  Don't assume.
+- **Always prompt for Lotus-tab-focused confirmation** in the Prerequisites
+  step. Don't assume.
+- **Run Stage 1 in parallel** (single message, four `Bash` tool calls) and
+  Stage 2 in parallel (three `Bash` tool calls). Stage 3 sub-agents also
+  run in parallel via simultaneous `Task` tool calls.
 - **Each run produces a new dated file.** Never overwrite previous audits.
   Never modify any pre-existing manually-authored audit (e.g. a vault note
   titled "Lotus — iOS Audit.md"); the skill writes only to its own dated
