@@ -1,1 +1,6 @@
 node_modules/
+
+# Generated audit reports — see .claude/skills/lotus-audit-ios/SKILL.md.
+# Reports land here by default; commit deliberately with `git add -f` if you
+# want a milestone snapshot in history.
+audits/
