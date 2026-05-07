@@ -364,10 +364,13 @@ fi
 
 If `$LOTUS_AUDIT_MIRROR` resolves under
 `~/Documents/Olly's Brain/Areas/JustPark/Projects/Lotus/Audits/`, append a
-bullet to that vault's `_Index.md` under `## Audits`:
+bullet to that vault's `_Index.md` under `## Audits`. Derive the wikilink
+target from the actual mirror filename (which may have a `-2`, `-3`, etc.
+suffix from the collision-check loop) — never hardcode the date format:
 
-```
-- [[Audits/YYYY-MM-DD]] — auto-generated
+```bash
+MIRROR_NAME=$(basename "$MIRROR" .md)
+echo "- [[Audits/$MIRROR_NAME]] — auto-generated" >> "$INDEX_PATH"
 ```
 
 Skip the index update for any other mirror destination — the skill only
