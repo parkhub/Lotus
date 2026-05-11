@@ -1,0 +1,134 @@
+# Lotus web audit — customer-facing scan targets.
+#
+# Per JustPark Jargon, the truly customer-facing web surfaces are narrow:
+# - frontend/web: "Main consumer-facing website. SSR SPA. Primary B2C product."
+# - frontend/pay: "Standalone pay-on-the-go product. No-login payment flow."
+# - justpark/resources/views/*: Legacy PHP/Blade — still serves mobile web + main site pages
+#
+# Operator portals (Luna, Solar, Terra, Enforcement) are NOT in scope.
+# A future `lotus-audit-web-portals` skill should cover those separately.
+
+apps:
+  # === parkhub/frontend monorepo ===
+
+  web:
+    repo: frontend
+    path: web/app
+    file_globs: ["**/*.tsx", "**/*.jsx", "**/*.ts", "**/*.scss", "**/*.css"]
+    tier: primary
+    description: Main JustPark consumer SSR SPA. The primary B2C product.
+
+  pay:
+    repo: frontend
+    path: pay/app
+    file_globs: ["**/*.tsx", "**/*.jsx", "**/*.ts", "**/*.scss", "**/*.css"]
+    tier: primary
+    description: Quick Pay — standalone pay-on-the-go product, no-login flow.
+
+  # === parkhub/justpark monolith (Laravel + Blade) — customer-facing subdirs ===
+
+  monolith-mobile:
+    repo: justpark
+    path: resources/views/mobile
+    file_globs: ["**/*.blade.php"]
+    tier: primary
+    description: Legacy mobile web templates (m.justpark.com). 63 templates.
+
+  monolith-site:
+    repo: justpark
+    path: resources/views/site
+    file_globs: ["**/*.blade.php"]
+    tier: primary
+    description: Main site Blade templates. 13 templates.
+
+  monolith-bookings:
+    repo: justpark
+    path: resources/views/bookings
+    file_globs: ["**/*.blade.php"]
+    tier: secondary
+    description: Booking-flow Blade templates (mostly migrated to frontend/web).
+
+  monolith-listings:
+    repo: justpark
+    path: resources/views/listings
+    file_globs: ["**/*.blade.php"]
+    tier: secondary
+    description: Listing-page Blade templates (mostly migrated to frontend/web).
+
+  monolith-referrals:
+    repo: justpark
+    path: resources/views/referrals
+    file_globs: ["**/*.blade.php"]
+    tier: secondary
+    description: Referrals pages.
+
+  monolith-auth:
+    repo: justpark
+    path: resources/views/auth
+    file_globs: ["**/*.blade.php"]
+    tier: secondary
+    description: Auth pages (login, register, password reset).
+
+  monolith-static:
+    repo: justpark
+    path: resources/views/static
+    file_globs: ["**/*.blade.php"]
+    tier: secondary
+    description: Static info pages.
+
+  monolith-npp:
+    repo: justpark
+    path: resources/views/npp
+    file_globs: ["**/*.blade.php"]
+    tier: secondary
+    description: National Parking Platform integration pages.
+
+  # === parkhub/justpark legacy SCSS pipeline ===
+
+  monolith-scss-app:
+    repo: justpark
+    path: public/assets/scss/app
+    file_globs: ["**/*.scss", "**/*.css"]
+    tier: primary
+    description: Legacy SCSS for the consumer app pages (compiled via Gulp).
+
+  monolith-scss-site:
+    repo: justpark
+    path: public/assets/scss/site
+    file_globs: ["**/*.scss", "**/*.css"]
+    tier: primary
+    description: Legacy SCSS for the main marketing/site pages.
+
+# Explicit excludes — documented here so the report can list them
+# under "Out of scope" for transparency.
+excluded:
+  operator_portals:
+    - frontend/luna           # Operator portal — parking space owners/hosts
+    - frontend/solar          # Internal ops/admin tool
+    - frontend/terra          # Business account portal (fleet/corporate)
+    - frontend/enforcement    # Enforcement tool
+
+  internal_or_utility:
+    - frontend/b2b            # B2B components
+    - frontend/event-management-tool
+    - frontend/browser-extension   # Internal dev tool (test-account login)
+    - frontend/qr             # QR-code generator utility
+    - frontend/justpark-ui    # The design system itself (definitions, not consumers)
+
+  monolith_internal:
+    - justpark/resources/views/admin
+    - justpark/resources/views/api
+    - justpark/resources/views/auxiliary
+    - justpark/resources/views/callcentre
+    - justpark/resources/views/dashboard
+    - justpark/resources/views/emails    # 343 templates; different audit (inline CSS rules)
+    - justpark/resources/views/errors    # internal error pages
+    - justpark/resources/views/misc
+    - justpark/resources/views/pdf
+    - justpark/resources/views/vendor
+
+  cms_managed:
+    - Storyblok                # Marketing landing pages + brand partner themes (NCP, O2)
+                               # Storyblok ALLOWS token overrides — that's the intended
+                               # partner-theming mechanism. Out of scope for code-based audit
+                               # but flagged in the report's "Scope" section.
